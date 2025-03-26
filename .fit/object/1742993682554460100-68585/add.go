@@ -83,7 +83,7 @@ func stageAllFiles() {
     }
 
     for _, entry := range entries {
-		if(entry.Name()==".fit"){continue}
+		if(entry.Name()==".fit" || entry.Name()==".git" || entry.Name()=="fit.exe"){continue}
         srcPath := filepath.Join(rootDir, entry.Name())
         destPath := filepath.Join(stagePath, entry.Name())
 

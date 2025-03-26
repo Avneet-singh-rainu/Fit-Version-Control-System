@@ -70,13 +70,9 @@ func main() {
 	}
 
 
-
-
 	default :{
-		fmt.Print("default case")
+		fmt.Print("default")
 		break
 	}
-
-
 	}
 }

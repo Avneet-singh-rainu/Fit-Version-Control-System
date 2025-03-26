@@ -1,7 +1,0 @@
-add.go E:\GoProjects\go-fit\.fit\stage\add.go
-checkout.go E:\GoProjects\go-fit\.fit\stage\checkout.go
-commit.go E:\GoProjects\go-fit\.fit\stage\commit.go
-go.mod E:\GoProjects\go-fit\.fit\stage\go.mod
-init.go E:\GoProjects\go-fit\.fit\stage\init.go
-log.go E:\GoProjects\go-fit\.fit\stage\log.go
-main.go E:\GoProjects\go-fit\.fit\stage\main.go

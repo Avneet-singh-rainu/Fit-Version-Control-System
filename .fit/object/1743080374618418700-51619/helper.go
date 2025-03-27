@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 )
-
 // MoveDir moves an entire directory and deletes the original after copying
+
 func MoveDir(src, dest string) error {
 	entries, err := os.ReadDir(src)
 	if err != nil {
@@ -168,44 +168,37 @@ func CopyFileAndCompress(srcFilePath, destFilePath string) error {
 
 // CopyFileAndDecompress decompresses a gzip file and saves it.
 func CopyFileAndDecompress(srcFilePath, destFilePath string) error {
-    // Check if the file actually has a .gz extension
-    if !strings.HasSuffix(srcFilePath, ".gz") {
-        return fmt.Errorf("file %s is not a gzip compressed file", srcFilePath)
-    }
+	srcCompressedFile, err := os.Open(srcFilePath)
+	if err != nil {
+		return fmt.Errorf("error opening source file: %v", err)
+	}
+	defer srcCompressedFile.Close()
 
-    // Open the compressed source file
-    srcCompressedFile, err := os.Open(srcFilePath)
-    if err != nil {
-        return fmt.Errorf("error opening compressed file: %v", err)
-    }
-    defer srcCompressedFile.Close()
+	// Ensure the destination file name is correct (removes `.gz` if needed)
+	if strings.HasSuffix(srcFilePath, ".gz") {
+		destFilePath = strings.TrimSuffix(srcFilePath, ".gz")
+	}
 
-    // Create the gzip reader
-    zr, err := gzip.NewReader(srcCompressedFile)
-    if err != nil {
-        return fmt.Errorf("error creating gzip reader: %v", err)
-    }
-    defer zr.Close()
+	destFile, err := os.Create(destFilePath)
+	if err != nil {
+		return fmt.Errorf("error creating destination file: %v", err)
+	}
+	defer destFile.Close()
 
-    // Remove .gz extension for the destination file
-    destFilePath = strings.TrimSuffix(destFilePath, ".gz")
+	zr, err := gzip.NewReader(srcCompressedFile)
+	if err != nil {
+		return fmt.Errorf("error creating gzip reader: %v", err)
+	}
+	defer zr.Close()
 
-    // Create the destination file
-    destFile, err := os.Create(destFilePath)
-    if err != nil {
-        return fmt.Errorf("error creating destination file: %v", err)
-    }
-    defer destFile.Close()
+	_, err = io.Copy(destFile, zr)
+	if err != nil {
+		return fmt.Errorf("error copying decompressed data: %v", err)
+	}
 
-    // Copy decompressed content into the destination file
-    if _, err := io.Copy(destFile, zr); err != nil {
-        return fmt.Errorf("error copying decompressed data: %v", err)
-    }
-
-    fmt.Println("✅ Decompression successful:", destFilePath)
-    return nil
+	fmt.Println("Decompression successful:", destFilePath)
+	return nil
 }
-
 
 // CopyFile copies a file from src to dest.
 func CopyFile(srcFilePath, destFilePath string) error {

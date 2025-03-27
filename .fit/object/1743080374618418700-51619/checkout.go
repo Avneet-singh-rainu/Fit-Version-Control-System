@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
-	"strings"
 )
 
 func Checkout(commitHash string) {
@@ -47,32 +45,18 @@ func Checkout(commitHash string) {
 	}
 }
 
-func RevertChanges(srcDir, destDir string) error {
-    fmt.Println("Starting RevertChanges from", srcDir, "to", destDir)
+func RevertChanges(srcDir,destDir string) error {
 
-    // Read all files from the srcDir
-    files, err := os.ReadDir(srcDir)
-    if err != nil {
-        return fmt.Errorf("error reading source directory: %v", err)
-    }
+	fmt.Println("Starting RevertChanges from", srcDir, "to", destDir)
 
-    for _, file := range files {
-        srcFilePath := filepath.Join(srcDir, file.Name())
-        destFilePath := filepath.Join(destDir, file.Name())
+	err := CopyDirAndDecompress(srcDir, destDir)
+	if err != nil {
+		fmt.Println("Error copying directory:", err)
+		return err
+	}
 
-        // Ensure we are reading compressed files correctly
-        if !strings.HasSuffix(file.Name(), ".gz") {
-            fmt.Println("Skipping non-gzipped file:", srcFilePath)
-            continue
-        }
+	fmt.Println("Successfully reverted changes")
 
-        err := CopyFileAndDecompress(srcFilePath, destFilePath)
-        if err != nil {
-            fmt.Println("Error decompressing file:", err)
-            return err
-        }
-    }
+	return nil
 
-    fmt.Println("✅ Successfully reverted changes")
-    return nil
 }

@@ -13,3 +13,7 @@ index.txt E:\GoProjects\go-fit\.fit\stage\index.txt
 init.go E:\GoProjects\go-fit\.fit\stage\init.go
 log.go E:\GoProjects\go-fit\.fit\stage\log.go
 main.go E:\GoProjects\go-fit\.fit\stage\main.go
+index.txt E:\GoProjects\go-fit\.fit\stage\index.txt
+init.go E:\GoProjects\go-fit\.fit\stage\init.go
+log.go E:\GoProjects\go-fit\.fit\stage\log.go
+main.go E:\GoProjects\go-fit\.fit\stage\main.go

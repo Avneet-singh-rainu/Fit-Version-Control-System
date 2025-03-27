@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func MoveDir(src, dest string) error {
@@ -77,4 +79,29 @@ func CopyDir(src, dest string) error {
 	}
 
 	return nil
+}
+
+
+func GetFitignFiles()([]string , error){
+	file,err:=os.Open(".fitign")
+
+	if  err!=nil {
+		return nil,err
+	}
+
+
+	content,err := io.ReadAll(file)
+
+	if err!=nil{
+		return nil,err
+	}
+
+	ignoreFiles := strings.Split(string(content), "\n")
+
+	for _,n :=  range ignoreFiles{
+		fmt.Println(n)
+	}
+	return ignoreFiles,nil
+
+
 }

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
+	"slices"
 )
 
 
@@ -60,8 +62,6 @@ func Add(filename string) {
 
 
 
-
-
 func stageAllFiles() {
     rootDir, err := os.Getwd()
     if err != nil {
@@ -83,7 +83,20 @@ func stageAllFiles() {
     }
 
     for _, entry := range entries {
-		if(entry.Name()==".fit" || entry.Name()==".git" || entry.Name()=="fit.exe"){continue}
+		// if the entry extension is in the fitign the dont add it to the staging area...
+		 entryExtension := path.Ext(entry.Name())
+		 ignoreFiles,err := GetFitignFiles()
+		fmt.Println(entry ,"---->",entryExtension)
+		if(err != nil){
+			fmt.Println("error in GetFitignFiles",err)
+		}
+
+		if slices.Contains(ignoreFiles,entryExtension){
+			continue
+		}
+
+		if(entry.Name()==".fit" || entry.Name()==".git" || entry.Name()=="fit.exe" ){continue}
+
         srcPath := filepath.Join(rootDir, entry.Name())
         destPath := filepath.Join(stagePath, entry.Name())
 

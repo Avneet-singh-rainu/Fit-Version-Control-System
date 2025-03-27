@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 )
 
@@ -60,8 +61,6 @@ func Add(filename string) {
 
 
 
-
-
 func stageAllFiles() {
     rootDir, err := os.Getwd()
     if err != nil {
@@ -83,7 +82,20 @@ func stageAllFiles() {
     }
 
     for _, entry := range entries {
-		if(entry.Name()==".fit" || entry.Name()==".git" || entry.Name()=="fit.exe"){continue}
+		// if the entry extension is in the fitign the dont add it to the staging area...
+		 entryExtension := path.Ext(entry.Name())
+		 ignoreFiles,err := GetFitignFiles()
+		fmt.Println(entry ,"---->",entryExtension)
+		if(err != nil){
+			fmt.Println("error in GetFitignFiles",err)
+		}
+
+		if Contains(ignoreFiles,entryExtension){
+			continue
+		}
+
+		if(entry.Name()==".fit" || entry.Name()==".git" || entry.Name()=="fit.exe" ){continue}
+
         srcPath := filepath.Join(rootDir, entry.Name())
         destPath := filepath.Join(stagePath, entry.Name())
 
@@ -119,4 +131,15 @@ func appendToFile(filepath, content string) error {
 	defer f.Close()
 	_, err = f.WriteString(content)
 	return err
+}
+
+
+
+func Contains(slice []string, item string) bool {
+	for _, str := range slice {
+		if str == item {
+			return true
+		}
+	}
+	return false
 }

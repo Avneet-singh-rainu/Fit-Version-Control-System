@@ -6,6 +6,7 @@ import (
 )
 
 func Init(){
+	messaageForFitign := ".fitign\n.mod\n.exe\n.git"
 	_,err := os.Getwd()
 	directories := []string{"object","HEAD","commit","stage"}
 
@@ -28,6 +29,15 @@ func Init(){
 		if(e!=nil){
 			fmt.Print(e)
 		}
+	}
+
+
+	// i need to create a .fitign file where i can add filenames,dirs and file extensions to avoid staging and all
+	err = os.WriteFile(".fitign",[]byte(messaageForFitign),0750)
+
+	if(err != nil){
+		fmt.Print("Error creating the fitign file",err)
+		return
 	}
 
 	fmt.Print("fit initiated the control system has been established...")

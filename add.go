@@ -83,16 +83,13 @@ func stageAllFiles() {
 
     for _, entry := range entries {
 		// if the entry extension is in the fitign the dont add it to the staging area...
-		 entryExtension := path.Ext(entry.Name())
-		 ignoreFiles,err := GetFitignFiles()
-		fmt.Println(entry ,"---->",entryExtension)
+		entryExtension := path.Ext(entry.Name())
+
+		ignoreFiles,ignoreDirs,err := GetFitignFiles()
 		if(err != nil){
 			fmt.Println("error in GetFitignFiles",err)
 		}
 
-		if Contains(ignoreFiles,entryExtension){
-			continue
-		}
 
 		if(entry.Name()==".fit" || entry.Name()==".git" || entry.Name()=="fit.exe" ){continue}
 
@@ -100,11 +97,17 @@ func stageAllFiles() {
         destPath := filepath.Join(stagePath, entry.Name())
 
         if entry.IsDir() {
+			if Contains(ignoreDirs,"/"+entry.Name()){
+				continue
+			}
             fmt.Println("Staging directory:", srcPath, "->", destPath)
             if err := CopyDir(srcPath, destPath); err != nil {
                 fmt.Println("Error staging directory:", err)
             }
         } else {
+			if Contains(ignoreFiles,entryExtension){
+				continue
+			}
             fmt.Println("Staging file:", srcPath, "->", destPath)
             if err := CopyFile(srcPath, destPath); err != nil {
                 fmt.Println("Error staging file:", err)

@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 )
 
@@ -83,30 +82,41 @@ func CopyDir(src, dest string) error {
 }
 
 
-func GetFitignFiles()([]string , error){
-	file,err:=os.Open(".fitign")
+func GetFitignFiles()(ignoreFiles []string,ignoreDirs []string,err error){
 
-	if  err!=nil {
-		return nil,err
+	file, err := os.Open(".fitign")
+	if err != nil {
+		return nil, nil, err
+	}
+	defer file.Close() // Ensure file is closed
+
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return nil, nil, err
 	}
 
+	rawEntries := strings.Split(string(content), "\n")
 
-	content,err := io.ReadAll(file)
-
-	if err!=nil{
-		return nil,err
-	}
-
-	ignoreFiles := strings.Split(string(content), "\n")
-
-	for idx,n :=  range ignoreFiles{
-		if n==""{
-			fmt.Print("found empty string")
-			ignoreFiles = slices.Delete(ignoreFiles,idx,idx+1)
+	for _, entry := range rawEntries {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
 		}
-		fmt.Print(n,"---->")
+
+		if strings.HasPrefix(entry, "/") {
+			ignoreDirs = append(ignoreDirs, entry)
+		} else {
+			ignoreFiles = append(ignoreFiles, entry)
+		}
 	}
-	return ignoreFiles,nil
+
+
+	fmt.Print(ignoreDirs)
+	fmt.Println("")
+	fmt.Print(ignoreFiles)
+
+
+	return ignoreFiles, ignoreDirs, nil
 
 
 }

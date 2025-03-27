@@ -82,26 +82,41 @@ func CopyDir(src, dest string) error {
 }
 
 
-func GetFitignFiles()([]string , error){
-	file,err:=os.Open(".fitign")
+func GetFitignFiles()(ignoreFiles []string,ignoreDirs []string,err error){
 
-	if  err!=nil {
-		return nil,err
+	file, err := os.Open(".fitign")
+	if err != nil {
+		return nil, nil, err
+	}
+	defer file.Close() // Ensure file is closed
+
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	rawEntries := strings.Split(string(content), "\n")
+
+	for _, entry := range rawEntries {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+
+		if strings.HasPrefix(entry, "/") {
+			ignoreDirs = append(ignoreDirs, entry)
+		} else {
+			ignoreFiles = append(ignoreFiles, entry)
+		}
 	}
 
 
-	content,err := io.ReadAll(file)
+	fmt.Print(ignoreDirs)
+	fmt.Println("")
+	fmt.Print(ignoreFiles)
 
-	if err!=nil{
-		return nil,err
-	}
 
-	ignoreFiles := strings.Split(string(content), "\n")
-
-	for _,n :=  range ignoreFiles{
-		fmt.Println(n)
-	}
-	return ignoreFiles,nil
+	return ignoreFiles, ignoreDirs, nil
 
 
 }

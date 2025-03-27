@@ -2,3 +2,4 @@
 .mod
 .exe
 .git
+/target

@@ -25,6 +25,7 @@ func main() {
 	if len(args) > 1 {
 		command = args[1]
 	} else {
+		color.Yellow("Version ----> %s", Version)
 		color.Cyan("Hi i am 'fit' your version control system.")
 		color.Cyan("Avneet Singh gave me birth.")
 		color.Cyan("I am built in Golang which makes me pretty.")

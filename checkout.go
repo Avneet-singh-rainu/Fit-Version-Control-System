@@ -60,8 +60,13 @@ func RevertChanges(srcDir, destDir string) error {
         srcFilePath := filepath.Join(srcDir, file.Name())
         destFilePath := filepath.Join(destDir, file.Name())
 
+		if file.IsDir(){
+			CopyDirAndDecompress(srcFilePath,destFilePath)
+			continue
+		}
+
         // Ensure we are reading compressed files correctly
-        if !strings.HasSuffix(file.Name(), ".gz") {
+        if !strings.HasSuffix(file.Name(), ".gz"){
             fmt.Println("Skipping non-gzipped file:", srcFilePath)
             continue
         }

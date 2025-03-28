@@ -101,7 +101,7 @@ func stageAllFiles() {
 				continue
 			}
             fmt.Println("Staging directory:", srcPath, "->", destPath)
-            if err := CopyDir(srcPath, destPath); err != nil {
+            if err := CopyDirAndCompress(srcPath, destPath); err != nil {
                 fmt.Println("Error staging directory:", err)
             }
         } else {

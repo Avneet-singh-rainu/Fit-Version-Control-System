@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 // Paths
@@ -24,11 +26,13 @@ func main() {
 	if len(args) > 1 {
 		command = args[1]
 	} else {
-		fmt.Println("No arguments provided")
+		color.Red("---Please provide some arguments---")
+		return
 	}
 
 
 	switch command {
+		
 	case "init":{
 			Init()
 			break

@@ -13,6 +13,8 @@ const commitIndexFile = commitFolder + "index.txt"
 const stageFolder = ".fit/stage/"
 const indexFile = stageFolder + "index.txt"
 const commitSeperator = ",,"
+const stageIndexFile = ".fit/stage/index.txt"
+var previousCommitId string = ""
 
 
 func main() {

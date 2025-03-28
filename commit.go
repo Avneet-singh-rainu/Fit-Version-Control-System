@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -79,6 +80,16 @@ func Commit(commitMessage string) {
 	_, err = file.WriteString(commitInfo)
 	if err != nil {
 		fmt.Println("Error writing to commit index file:", err)
+	}
+
+
+	f,err := os.Create(".fit/HEAD/index.txt")
+	if err != nil {
+		fmt.Println("Error creating head index file:", err)
+	}
+	_,err = io.Writer.Write(f,[]byte(uniqueName))
+	if err != nil {
+		fmt.Println("Error writing to creating head index file:", err)
 	}
 
 	fmt.Println("Commit successful:", uniqueName)

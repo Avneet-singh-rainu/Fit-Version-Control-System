@@ -37,36 +37,13 @@ func MoveDir(src, dest string) error {
 	return os.RemoveAll(src)
 }
 
-// CopyDirAndCompress recursively copies and compresses a directory.
-func CopyDirAndCompress(src, dest string) error {
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return err
-	}
 
-	if err := os.MkdirAll(dest, 0750); err != nil {
-		return err
-	}
 
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		destPath := filepath.Join(dest, entry.Name()+".gz") // Ensure compressed files have `.gz`
 
-		if entry.IsDir() {
-			// Recursively compress subdirectories
-			if err := CopyDirAndCompress(srcPath, destPath); err != nil {
-				return err
-			}
-		} else {
-			// Compress individual files
-			if err := CopyFileAndCompress(srcPath, destPath); err != nil {
-				return err
-			}
-		}
-	}
 
-	return nil
-}
+
+
+
 
 // CopyDirAndDecompress recursively copies and decompresses a directory.
 func CopyDirAndDecompress(src, dest string) error {
@@ -98,6 +75,18 @@ func CopyDirAndDecompress(src, dest string) error {
 
 	return nil
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 // GetFitignFiles reads the `.fitign` file and retrieves ignored files and directories.
 func GetFitignFiles() (ignoreFiles []string, ignoreDirs []string, err error) {
@@ -134,37 +123,26 @@ func GetFitignFiles() (ignoreFiles []string, ignoreDirs []string, err error) {
 	return ignoreFiles, ignoreDirs, nil
 }
 
-// CopyFileAndCompress compresses a file and saves it.
-func CopyFileAndCompress(srcFilePath, destFilePath string) error {
-	srcFile, err := os.Open(srcFilePath)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
 
-	// Ensure destination file has `.gz` extension
-	if !strings.HasSuffix(destFilePath, ".gz") {
-		destFilePath += ".gz"
-	}
 
-	destFile, err := os.Create(destFilePath)
-	if err != nil {
-		return err
-	}
-	defer destFile.Close()
 
-	zw := gzip.NewWriter(destFile)
-	defer zw.Close()
 
-	// Use io.Copy instead of reading the entire file into memory
-	_, err = io.Copy(zw, srcFile)
-	if err != nil {
-		return err
-	}
 
-	fmt.Println("Compression successful:", destFilePath)
-	return nil
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // CopyFileAndDecompress decompresses a gzip file and saves it.
 func CopyFileAndDecompress(srcFilePath, destFilePath string) error {
@@ -205,6 +183,29 @@ func CopyFileAndDecompress(srcFilePath, destFilePath string) error {
     fmt.Println("✅ Decompression successful:", destFilePath)
     return nil
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // CopyFile copies a file from src to dest.

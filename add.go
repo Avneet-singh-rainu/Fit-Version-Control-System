@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +11,9 @@ import (
 	"github.com/fatih/color"
 )
 
+type PreviousCommitFileHashes struct{
+	Files map[string]string
+}
 
 
 func Add(filename string) {
@@ -63,7 +67,7 @@ func Add(filename string) {
 
 	// Store filename mapping in the index file
 	entry := fmt.Sprintf("%s %s\n", filename, filename)
-	if err := appendToFile(indexFile, entry); err != nil {
+	if err := EntryHashToFile(indexFile, entry); err != nil {
 		fmt.Println("Error writing to index file:", err)
 		return
 	}
@@ -74,36 +78,58 @@ func Add(filename string) {
 
 
 func stageAllFiles() {
+	// before stagin the files in need to get the previous commit hash
+	// using this hash i will locate the previous commit
+	// after locating the precious commit i will have to read its index file to make a map [ path --> hash of the file]
+	// i store it in the map
+	// now for each file in the working dir i will calculate its hash
+	// if the current file hash is in the calculated map then i will return and
+	// add the previous commit reference in the FIleTOHAsh stuct
+	// [ filepath -----Map to---> previous commit id ]
+	// and i can locate the content of the file using the commit id in the object and after that i can can its index for the filepath that
+	// i want and from there i will get the hash of the file and load its content...
+	previousFileToHash := SFileToHash{Files: make(map[string]string)}
+	err := CalculatePreviousHashes(&previousFileToHash)
+	if err!=nil{
+		fmt.Println("error calculating previous hashes...",err)
+	}
+
+
+	//  initiating a fileToHash struct so that i can store the current files info
+	fileToHash := SFileToHash{Files: make(map[string]string)}
     rootDir, err := os.Getwd()
     if err != nil {
         fmt.Println("Error getting current directory:", err)
         return
     }
 
+	// calculating the stage path for further use
     stagePath := filepath.Join(rootDir, stageFolder)
-
     if err := os.MkdirAll(stagePath, 0755); err != nil {
         fmt.Println("Error creating stage folder:", err)
         return
     }
 
+
+	// read all the dirs in the cwd so that i can stage them
     entries, err := os.ReadDir(rootDir)
     if err != nil {
         fmt.Println("Error reading directory:", err)
         return
     }
 
+
+	// iteration over the files and dirs in the cwd
     for _, entry := range entries {
 		// if the entry extension is in the fitign the dont add it to the staging area...
 		entryExtension := path.Ext(entry.Name())
-
 		ignoreFiles,ignoreDirs,err := GetFitignFiles()
 		if(err != nil){
 			fmt.Println("error in GetFitignFiles",err)
 		}
-
-
 		if(entry.Name()==".fit" || entry.Name()==".git" || entry.Name()=="fit.exe" ){continue}
+
+
 
         srcPath := filepath.Join(rootDir, entry.Name())
         destPath := filepath.Join(stagePath, entry.Name())
@@ -113,40 +139,57 @@ func stageAllFiles() {
 				continue
 			}
             fmt.Println("Staging directory:", srcPath, "->", destPath)
-            if err := CopyDirAndCompress(srcPath, destPath); err != nil {
+            if err := CopyDirAndCompress(srcPath, destPath,&fileToHash,&previousFileToHash); err != nil {
                 fmt.Println("Error staging directory:", err)
             }
         } else {
 			if Contains(ignoreFiles,entryExtension){
 				continue
 			}
+			// i will store the dest file by his calculated hash...
             fmt.Println("Staging file:", srcPath, "->", destPath)
-            if err := CopyFileAndCompress(srcPath, destPath); err != nil {
+            if err := CopyFileAndCompress(srcPath, destPath,&fileToHash,&previousFileToHash); err != nil {
                 fmt.Println("Error staging file:", err)
-            } else {
-                // Append file to index
-                entry := fmt.Sprintf("%s %s\n", entry.Name(), destPath)
-                if err := appendToFile(indexFile, entry); err != nil {
-                    fmt.Println("Error writing to index file:", err)
-                }
-            }
+             } //else {
+            //     // Append file to index
+            //     entry := fmt.Sprintf("%s %s\n", entry.Name(), destPath)
+            //     if err := EntryHashToFile(indexFile, entry); err != nil {
+            //         fmt.Println("Error writing to index file:", err)
+            //     }
+            // }
         }
     }
-    fmt.Println("All files staged successfully.")
+
+	bres,err := json.Marshal(fileToHash)
+
+	if err!=nil{
+		fmt.Println("error in Marshaling to json",err)
+	}
+
+    fmt.Println(string(bres))
+
+	file,err := os.Create(indexFile)
+	if(err !=nil){
+		fmt.Println("errror in creating stage index file",err)
+	}
+
+	file.Write(bres)
+	file.Close()
+
 }
 
 
 
 // appendToFile adds a new entry to the index file
-func appendToFile(filepath, content string) error {
-	f, err := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	_, err = f.WriteString(content)
-	return err
-}
+// func appendToFile(filepath, content string) error {
+// 	f, err := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer f.Close()
+// 	_, err = f.WriteString(content)
+// 	return err
+// }
 
 
 

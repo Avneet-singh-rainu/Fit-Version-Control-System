@@ -6,9 +6,31 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func Checkout(commitHash string) {
+	// i need to check if fit is initiated or not?
+
+	err := FitExists()
+	if(err!=nil){
+		color.Red("---Please initiate the fit first---")
+		return
+	}
+
+	// before checking out i need to ensure that there are some previous commits
+	// if there are no commits then i will just return
+	// no previous versions found
+
+	err = CommitsExists()
+
+	if err!=nil{
+		color.Red(err.Error())
+	}
+
+
+
 
 	// find the commithash named dir in the "fit/object/" dir.
 	//after finding the dir i need to move the content of that dir into the cwd or base dir

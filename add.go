@@ -6,13 +6,25 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/fatih/color"
 )
 
 
 
 func Add(filename string) {
+
+	// before staging the content make sure the user have initiated the fit
+	// we can ensure it by checking if the ".fit" folder exists or not
+	err := FitExists()
+	if err!=nil{
+		color.Red("Please initiate the fit first")
+		color.Cyan("You can do so by using the command --> fit init")
+		return
+	}
+
 	// Ensure the staging folder exists
-	if err := os.MkdirAll(stageFolder, 0755); err != nil {
+	if err = os.MkdirAll(stageFolder, 0755); err != nil {
 		fmt.Println("Error creating staging directory:", err)
 		return
 	}

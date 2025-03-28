@@ -6,11 +6,36 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 
 
 func Commit(commitMessage string) {
+
+	// Before processing the commit i need to check if the fit has been initiated or not ?
+	// this can be dont by checking wheather "fit" dir exists or not ?
+
+	err := FitExists()
+	if err!=nil{
+		color.Red("Please initiate the fit first")
+		color.Cyan("You can do so by using the command --> fit init")
+		return
+	}
+
+
+	// after this i also need to check if the stage area has some files to commit or not
+	// if there are no files to stage i can just retun
+	// this can be done by checking if there is stage folder inside the "fit" dir
+	// is the stage folder is there then i will process further
+	err = StageExixts()
+	if err!=nil{
+		color.Red(err.Error())
+		return
+	}
+	// if there is not stage area the return
+
 
 	//create unique commit id
 	//create a new folder in the "fit/object/unique-commit-id"

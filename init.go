@@ -3,12 +3,15 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 func Init(){
+
 	messaageForFitign := ".fitign\n.mod\n.exe\n.git"
 	_,err := os.Getwd()
-	directories := []string{"object","HEAD","commit","stage"}
+	directories := []string{"object","HEAD","commit"}
 
 	if(err!=nil){
 		fmt.Print(err)
@@ -18,9 +21,9 @@ func Init(){
 	//dirName := path.Join(currDirectory,".fit")
 
 	e := os.Mkdir(".fit",0750)
-
+	// if fit is already initiated then return
 	if(e!=nil){
-		fmt.Print(e)
+		color.Red("already initiated provide other commands")
 		return
 	}
 
@@ -40,6 +43,7 @@ func Init(){
 		return
 	}
 
-	fmt.Print("fit initiated the control system has been established...")
+	fmt.Println("fit initiated the control system has been established...")
+	color.Yellow("--------Make sure you add large files in the fitign file.--------")
 
 }

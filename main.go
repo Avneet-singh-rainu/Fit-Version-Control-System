@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/fatih/color"
@@ -26,16 +25,23 @@ func main() {
 	if len(args) > 1 {
 		command = args[1]
 	} else {
-		color.Red("---Please provide some arguments---")
+		color.Cyan("Hi i am 'fit' your version control system.")
+		color.Cyan("Avneet Singh gave me birth.")
+		color.Cyan("I am built in Golang which makes me pretty.")
 		return
 	}
 
 
 	switch command {
-		
+
 	case "init":{
 			Init()
 			break
+	}
+
+	case "help":{
+		Help()
+		break
 	}
 
 	case "add":{
@@ -43,7 +49,7 @@ func main() {
 			filename = args[2]
 			Add(filename)
 		} else {
-			fmt.Println("Filename argument is missing")
+			color.Red("Filename argument is missing")
 		}
 		break
 	}
@@ -53,7 +59,7 @@ func main() {
 			commitMessage = args[3]
 			Commit(commitMessage)
 		} else {
-			fmt.Println("Filename argument is missing")
+			color.Red("Filename argument is missing")
 		}
 		break
 	}
@@ -68,14 +74,15 @@ func main() {
 			commitHash = args[2]
 			Checkout(commitHash)
 		} else {
-			fmt.Println("Filename argument is missing")
+			color.Red("Filename argument is missing")
 		}
 		break
 	}
 
 
 	default :{
-		fmt.Print("default")
+		color.Red("Please provide a valid command")
+		color.Green("fit [help]")
 		break
 	}
 	}

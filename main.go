@@ -16,7 +16,7 @@ const commitSeperator = ",,"
 const stageIndexFile = ".fit/stage/index.txt"
 var previousCommitId string = ""
 
-
+// 2
 func main() {
 	args := os.Args
 	var command string

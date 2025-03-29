@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
-	"slices"
+	"strings"
+
+	"github.com/fatih/color"
 )
 
 type SFileToHash struct{
+	ParentCommitId string
 	Files map[string]string
 }
 
@@ -20,7 +22,7 @@ type SFileToHash struct{
 
 
 // CopyDirAndCompress recursively copies and compresses a directory.
-func CopyDirAndCompress(src, dest string , fileToHash , previousFileToHash *SFileToHash) error {
+func CopyDirAndCompress(src, dest string , fileToHash , latestCommitIndex *map[string]string) error {
 	entries, err := os.ReadDir(src)
 	if err != nil {
 		return err
@@ -44,14 +46,14 @@ func CopyDirAndCompress(src, dest string , fileToHash , previousFileToHash *SFil
 
 		if entry.IsDir() {
 			// Recursively compress subdirectories
-			if err := CopyDirAndCompress(srcPath, destPath,fileToHash,previousFileToHash); err != nil {
+			if err := CopyDirAndCompress(srcPath, destPath,fileToHash,latestCommitIndex); err != nil {
 				return err
 			}
 		} else {
 			// Compress individual files
 
             fmt.Println("Staging file:", srcPath, "->", hashDestFilePath)
-			if err := CopyFileAndCompress(srcPath, destPath,fileToHash,previousFileToHash); err != nil {
+			if err := CopyFileAndCompress(srcPath, destPath,fileToHash,latestCommitIndex); err != nil {
 				return err
 			} else {
                 // Append file to index
@@ -69,47 +71,57 @@ func CopyDirAndCompress(src, dest string , fileToHash , previousFileToHash *SFil
 
 
 // CopyFileAndCompress compresses a file and saves it.
-func CopyFileAndCompress(srcFilePath, destFilePath string, fileToHash,previousFileToHash *SFileToHash) error {
-
-	// calculating the hash of the current file so that i can compare it with the entries in the preciousFileToHAsh
-	destFileHash,err := CalculateHash(srcFilePath)
+func CopyFileAndCompress(srcFilePath, destFilePath string, newCommitIndexInfo,latestCommitIndex *map[string]string) error {
+	// calculating the hash of the current file so that i can compare it with the entries in the latestComitIndexFile
+	srcFileHash,err := CalculateHash(srcFilePath)
 	if err != nil {
 		return err
 	}
 
-	var hashList []string
-    for _, v := range previousFileToHash.Files {
-        hashList = append(hashList, v)
-    }
+	cwd,err := os.Getwd()
+	if err!=nil{
+		color.Red("error getting cwd...")
+	}
+
+	blastCommitId,err := os.ReadFile(filepath.Join(cwd,".fit","HEAD","index.txt"))
+	if err!=nil{
+		color.Red("error reading head index txt...")
+	}
+
+	// var hashList []string
+	// for _, v := range *latestCommitIndex {
+    //     vparts := strings.Split(v, "---")
+	// 	if len(vparts)>1{
+	// 		hashList = append(hashList, vparts[2])
+	// 	}else{
+	// 		hashList = append(hashList, v)
+	// 	}
+    // }
 
     // Use slices.Contains
-    if slices.Contains(hashList, destFileHash) {
-		for _, hash := range previousFileToHash.Files {
-			if hash == destFileHash {
-				fileToHash.Files[srcFilePath] = "commit---"+previousCommitId+"---"+hash
-				return nil
-			}
-		}
+	for _, hash := range *latestCommitIndex {
 
-    } else {
-        fmt.Println("File hash does not exist in the map.")
-    }
+		hashParts := strings.Split(hash, "---")
+		fmt.Println("stsaging hashparts of latest commit",hashParts)
+		if len(hashParts)>1 && hashParts[2]==srcFileHash{
+			(*newCommitIndexInfo)[srcFilePath] = "commit---"+string(blastCommitId)+"---"+hashParts[2]
+			return nil
+		}else if hash == srcFileHash {
+			(*newCommitIndexInfo)[srcFilePath] = "commit---"+string(blastCommitId)+"---"+hash
+			return nil
+		} else {
+			fmt.Println("File hash does not exist in the map.")
+		}
+	}
 
 	// adding the entry in the map
 
-	fileToHash.Files[srcFilePath] = destFileHash
-
-
+	(*newCommitIndexInfo)[srcFilePath] = srcFileHash
 
 	// after making the filepath --> file hash entry
 	// i need to add the file in the stagin area
 
-	cwd,err:=os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	stageFilePath := filepath.Join(cwd, ".fit", "stage", destFileHash+".gz")
+	stageFilePath := filepath.Join(cwd, ".fit", "stage", srcFileHash+".gz")
 	destFile, err := os.Create(stageFilePath)
 	if err != nil {
 		return err
@@ -177,37 +189,44 @@ func EntryHashToFile(filePath,hashedFileName string) error {
 
 
 
-func CalculatePreviousHashes(previousFileToHash *SFileToHash) error {
-
-	bfile , err := os.ReadFile(".fit/HEAD/index.txt")
-	if err!=nil{
-		return err
-	}
-	previousCommitId = string(bfile)
+func CalculatePreviousHashes(lastCommitIndexInfo *SFileToHash) error {
 
 	cwd,err := os.Getwd()
 	if err!=nil{
 		return err
 	}
 
-	dirs , err := os.ReadDir(path.Join(cwd,".fit","object",previousCommitId))
+	bfile , err := os.ReadFile(".fit/HEAD/index.txt")
 	if err!=nil{
 		return err
 	}
 
-	for _,dir := range dirs{
-		if dir.IsDir(){continue}
-		fmt.Println(dir.Name())
-
-		if dir.Name()=="index.txt"{
-			file,err := os.ReadFile(".fit/object/"+previousCommitId+"/"+dir.Name())
-			if err!=nil{
-				return err
-			}
-			json.Unmarshal(file,previousFileToHash)
-		}
-
+	// get the last commit index file to prepare a map path ----> hash
+	blastIndexFile,err := os.ReadFile(filepath.Join(cwd,".fit","object",string(bfile),"index.txt"))
+	if err!=nil{
+		return err
 	}
+
+	json.Unmarshal(blastIndexFile,&lastCommitIndexInfo)
+
+	// dirs , err := os.ReadDir(path.Join(cwd,".fit","object",previousCommitId))
+	// if err!=nil{
+	// 	return err
+	// }
+
+	// for _,dir := range dirs{
+	// 	if dir.IsDir(){continue}
+	// 	fmt.Println(dir.Name())
+
+	// 	if dir.Name()=="index.txt"{
+	// 		file,err := os.ReadFile(".fit/object/"+previousCommitId+"/"+dir.Name())
+	// 		if err!=nil{
+	// 			return err
+	// 		}
+	// 		json.Unmarshal(file,lastCommitIndexInfo)
+	// 	}
+
+	// }
 
 	return nil
 }

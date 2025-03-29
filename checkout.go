@@ -68,7 +68,7 @@ func Checkout(commitHash string) {
 // and from there i can get the file having the same hash that i have store in the format ["COMMIT-\COMMITID-\FILEHASH"]
 
 
-func RevertChanges(prevCommitDir, cwd,currCommitId string) error {
+func RevertChanges(prevCommitDir,cwd,userGivenCommit string) error {
     //fmt.Println("Starting RevertChanges from", prevCommitDir, "to", cwd)
 
 	// i will read the index.txt from the prevCommitDir and converet it into MAP of FileToHash
@@ -93,11 +93,11 @@ func RevertChanges(prevCommitDir, cwd,currCommitId string) error {
    for k,v := range prevCommitIndexMap.Files{
 		values := strings.Split(v, "---")
 		if len(values)>1{
-			BringAndUpdateFromReferencedCommit(k,currCommitId,values[1],values[2])
+			BringAndUpdateFromReferencedCommit(k,userGivenCommit,values[1],values[2])
 		} else {
-			err = BringAndUpdateFromThisCommit(k,currCommitId,values[0])
+			err = BringAndUpdateFromThisCommit(k,userGivenCommit,values[0])
 			if err!=nil{
-				fmt.Printf("error updating file from %v commit ---> %v\n",currCommitId,err)
+				fmt.Printf("error updating file from %v commit ---> %v\n",userGivenCommit,err)
 			}
 		}
    }
@@ -133,6 +133,12 @@ func RevertChanges(prevCommitDir, cwd,currCommitId string) error {
     //     }
     // }
 
-    fmt.Println("✅ Successfully reverted changes")
+	err = ChangeHead(userGivenCommit)
+	if err!=nil{
+		color.Red("error changing the head..." , err)
+	}
+
+	color.Cyan("Head changed to ----> ",userGivenCommit)
+
     return nil
 }

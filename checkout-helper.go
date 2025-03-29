@@ -11,7 +11,6 @@ import (
 )
 
 // i will have to recursively get the file from the foreign
-//
 func BringAndUpdateFromReferencedCommit(destAbsPath,checkoutCommitId,foreignCommitId, fileHash string) error {
 	cwd,err:= os.Getwd()
 	if err!=nil{
@@ -19,7 +18,7 @@ func BringAndUpdateFromReferencedCommit(destAbsPath,checkoutCommitId,foreignComm
 		return err
 	}
 	destFileName := filepath.Base(destAbsPath)
-	destTestingPath := filepath.Join(`E:\GoProjects\go-fit\testing`, destFileName)
+	destTestingPath := filepath.Join(`E:\GoProjects\go-fit`, destFileName)
 
 	// i will have to go to the foreign commit and read its index.txt
 	// read its index.txt into map
@@ -38,7 +37,7 @@ func BringAndUpdateFromReferencedCommit(destAbsPath,checkoutCommitId,foreignComm
 		return err
 	}
 	// the bfile is json unmarshal it into the struct
-	foreignIndexInfoMap := SFileToHash{map[string]string{}}
+	foreignIndexInfoMap := SFileToHash{ParentCommitId:"", Files : map[string]string{}}
 	err = json.Unmarshal(bfile,&foreignIndexInfoMap)
 	if err!=nil{
 		color.Red("error unmarshalling the foreign index file",err)
@@ -61,6 +60,7 @@ func BringAndUpdateFromReferencedCommit(destAbsPath,checkoutCommitId,foreignComm
 		if err!=nil{
 			color.Red("error while copying the referenced file",err)
 		}
+		color.Yellow("✅ Successfully reverted changes: ",srcCommitFile)
 	}
 
 	return nil
@@ -78,7 +78,7 @@ func BringAndUpdateFromThisCommit(destAbsPath,currCommitId,fileHash string) erro
 
 	srcPath := filepath.Join(cwd, ".fit", "object", currCommitId, fileHash+".gz")
 	destFileName := filepath.Base(destAbsPath)
-	testingDestPath := filepath.Join(`E:\GoProjects\go-fit\testing`, destFileName)
+	testingDestPath := filepath.Join(`E:\GoProjects\go-fit`, destFileName)
 
 
 	err = CopyFileAndDecompress(srcPath,testingDestPath)
@@ -86,5 +86,19 @@ func BringAndUpdateFromThisCommit(destAbsPath,currCommitId,fileHash string) erro
 		fmt.Println("error in creataing  file")
 		return err
 	}
+	return nil
+}
+
+
+
+func ChangeHead(userGivenCommit string) error {
+	cwd,err:=os.Getwd()
+	if err!=nil{
+		color.Red("error getting cwd")
+		return err
+	}
+
+	headFilePath := filepath.Join(cwd,".fit","HEAD","index.txt")
+	os.WriteFile(headFilePath, []byte(userGivenCommit), 0666)
 	return nil
 }

@@ -78,30 +78,36 @@ func Add(filename string) {
 
 
 func stageAllFiles() {
-	// before stagin the files in need to get the previous commit hash
-	// using this hash i will locate the previous commit
-	// after locating the precious commit i will have to read its index file to make a map [ path --> hash of the file]
+	// before staging the files i need to get the parent commit hash
+	// using this hash i will locate the latest commit
+	// after locating the latest commit i will have to read its index file to make a map [ path --> hash of the file]
 	// i store it in the map
 	// now for each file in the working dir i will calculate its hash
-	// if the current file hash is in the calculated map then i will return and
-	// add the previous commit reference in the FIleTOHAsh stuct
+	// if the current file hash is in the latestCommitInfo map then i will return and
+	// add the latest commit reference in the FIleToHash stuct
 	// [ filepath -----Map to---> previous commit id ]
 	// and i can locate the content of the file using the commit id in the object and after that i can can its index for the filepath that
 	// i want and from there i will get the hash of the file and load its content...
-	previousFileToHash := SFileToHash{Files: make(map[string]string)}
-	err := CalculatePreviousHashes(&previousFileToHash)
-	if err!=nil{
-		fmt.Println("error calculating previous hashes...",err)
-	}
-
-
-	//  initiating a fileToHash struct so that i can store the current files info
-	fileToHash := SFileToHash{Files: make(map[string]string)}
-    rootDir, err := os.Getwd()
+	rootDir, err := os.Getwd()
     if err != nil {
         fmt.Println("Error getting current directory:", err)
         return
     }
+
+	latestCommitHash,err := os.ReadFile(filepath.Join(rootDir,".fit","HEAD","index.txt"))
+	if err != nil {
+        os.WriteFile(filepath.Join(rootDir,".fit","HEAD","index.txt"),[]byte{00},0666)
+    }
+
+
+	lastCommitIndexInfo := SFileToHash{ParentCommitId : "",Files: make(map[string]string)}
+	err = CalculatePreviousHashes(&lastCommitIndexInfo)
+	if err!=nil{
+		fmt.Println("error calculating previous hashes...",err)
+	}
+
+	// initiating a fileToHash struct so that i can store the current files info
+	newCommitIndexInfo := SFileToHash{ParentCommitId : "",Files: make(map[string]string)}
 
 	// calculating the stage path for further use
     stagePath := filepath.Join(rootDir, stageFolder)
@@ -117,10 +123,9 @@ func stageAllFiles() {
         fmt.Println("Error reading directory:", err)
         return
     }
-
-
 	// iteration over the files and dirs in the cwd
     for _, entry := range entries {
+
 		// if the entry extension is in the fitign the dont add it to the staging area...
 		entryExtension := path.Ext(entry.Name())
 		ignoreFiles,ignoreDirs,err := GetFitignFiles()
@@ -139,7 +144,7 @@ func stageAllFiles() {
 				continue
 			}
             fmt.Println("Staging directory:", srcPath, "->", destPath)
-            if err := CopyDirAndCompress(srcPath, destPath,&fileToHash,&previousFileToHash); err != nil {
+            if err := CopyDirAndCompress(srcPath, destPath,&newCommitIndexInfo.Files,&lastCommitIndexInfo.Files); err != nil {
                 fmt.Println("Error staging directory:", err)
             }
         } else {
@@ -147,9 +152,10 @@ func stageAllFiles() {
 				continue
 			}
 			// i will store the dest file by his calculated hash...
-            fmt.Println("Staging file:", srcPath, "->", destPath)
-            if err := CopyFileAndCompress(srcPath, destPath,&fileToHash,&previousFileToHash); err != nil {
+            //fmt.Println("Staging file:", srcPath, "->", destPath)
+            if err := CopyFileAndCompress(srcPath, destPath,&newCommitIndexInfo.Files,&lastCommitIndexInfo.Files); err != nil {
                 fmt.Println("Error staging file:", err)
+				return
              } //else {
             //     // Append file to index
             //     entry := fmt.Sprintf("%s %s\n", entry.Name(), destPath)
@@ -160,7 +166,10 @@ func stageAllFiles() {
         }
     }
 
-	bres,err := json.Marshal(fileToHash)
+
+
+	newCommitIndexInfo.ParentCommitId=string(latestCommitHash)
+	bres,err := json.Marshal(newCommitIndexInfo)
 
 	if err!=nil{
 		fmt.Println("error in Marshaling to json",err)

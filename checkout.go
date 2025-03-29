@@ -36,7 +36,6 @@ func Checkout(commitHash string) {
 
 			if dirName==commitHash{
 				cwd, e := os.Getwd()
-				fmt.Println("ced,,,",cwd)
 				if e != nil {
 					fmt.Println("Error getting the current working directory:")
 					return

@@ -17,8 +17,8 @@ func BringAndUpdateFromReferencedCommit(destAbsPath,checkoutCommitId,foreignComm
 		fmt.Println("error in reading cwd")
 		return err
 	}
-	destFileName := filepath.Base(destAbsPath)
-	destTestingPath := filepath.Join(`E:\GoProjects\go-fit`, destFileName)
+	//destFileName := filepath.Base(destAbsPath)
+	//destTestingPath := filepath.Join(`E:\GoProjects\go-fit`, destFileName)
 
 	// i will have to go to the foreign commit and read its index.txt
 	// read its index.txt into map
@@ -56,7 +56,7 @@ func BringAndUpdateFromReferencedCommit(destAbsPath,checkoutCommitId,foreignComm
 		}
 		} else {
 			srcCommitFile := filepath.Join(srcCommitDir,requiredFileHash)
-		err = CopyFileAndDecompress(srcCommitFile+".gz",destTestingPath)
+		err = CopyFileAndDecompress(srcCommitFile+".gz",destAbsPath)
 		if err!=nil{
 			color.Red("error while copying the referenced file",err)
 		}
@@ -77,11 +77,11 @@ func BringAndUpdateFromThisCommit(destAbsPath,currCommitId,fileHash string) erro
 	}
 
 	srcPath := filepath.Join(cwd, ".fit", "object", currCommitId, fileHash+".gz")
-	destFileName := filepath.Base(destAbsPath)
-	testingDestPath := filepath.Join(`E:\GoProjects\go-fit`, destFileName)
+	//destFileName := filepath.Base(destAbsPath)
+	//testingDestPath := filepath.Join(`E:\GoProjects\go-fit`, destFileName)
 
 
-	err = CopyFileAndDecompress(srcPath,testingDestPath)
+	err = CopyFileAndDecompress(srcPath,destAbsPath)
 	if err!=nil{
 		fmt.Println("error in creataing  file")
 		return err

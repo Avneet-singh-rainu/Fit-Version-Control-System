@@ -1,0 +1,17 @@
+{
+  "Files": {
+    "E:\\GoProjects\\go-fit\\add.go": "commit-1743166215460989400-54890-9643cad23f6484a03bd255fe0b7b93ca0c069fc31266e140366adb7d6550e03d",
+    "E:\\GoProjects\\go-fit\\checkout.go": "10cf97fad62eca187690cc1788766ed99a9cbae4baad74c6ee4ede8bbd1216cd",
+    "E:\\GoProjects\\go-fit\\commit.go": "84278279fc23d81f6204198b00971230ceba625f253886076593a9c75864bc50",
+    "E:\\GoProjects\\go-fit\\go.sum": "af8f3a823b1dd091af6862fd700101cdf5e962eedfad3e9df7b55da4176261f8",
+    "E:\\GoProjects\\go-fit\\helper.go": "3ca6928d34e67e6a6b31ad6587d5dec7d9592945cb5446bf497e9dc59a014b47",
+    "E:\\GoProjects\\go-fit\\init.go": "4cf1b4244bc0648187a293c05b0bc7dcb9cfc26b8fb3894332c105959d7ba18f",
+    "E:\\GoProjects\\go-fit\\log.go": "f306af926efb3badc87c967c7c6dbd279e60675996f3c3834a704b2d183e6049",
+    "E:\\GoProjects\\go-fit\\main.go": "commit-1743166215460989400-54890-2e15d9156cda659f6a0e0d700a649c91a2fd28ab95247672c4f0b7dd2cfabd3a",
+    "E:\\GoProjects\\go-fit\\show-help.go": "b689fd949cff5d3ac5cba01ca09d0475da4ee055e1443a7a64b1cc26ab0cee08",
+    "E:\\GoProjects\\go-fit\\staging-helper.go": "3af1eaecdb386c3d88794891fd15c151e1268954f3709152342a082797fdbe96",
+    "E:\\GoProjects\\go-fit\\target\\test.go": "ab0c1ef5272d548d6f660b2d1b1dd8aebe8b52a9ad78f4aa6c37fb9a6a007415",
+    "E:\\GoProjects\\go-fit\\validation-check.go": "55c837f810851b6d5e0fe3604f60ea4f173405219b7961226b97e8aebfd92eee",
+    "E:\\GoProjects\\go-fit\\version.go": "fae37a30b0d381ebb8b0febbe9f1c73304944c1eeed1ff0f6d2a59d02493aea3"
+  }
+}

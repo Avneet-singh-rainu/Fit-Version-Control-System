@@ -86,7 +86,7 @@ func CopyFileAndCompress(srcFilePath, destFilePath string, fileToHash,previousFi
     if slices.Contains(hashList, destFileHash) {
 		for _, hash := range previousFileToHash.Files {
 			if hash == destFileHash {
-				fileToHash.Files[srcFilePath] = "commit-"+previousCommitId
+				fileToHash.Files[srcFilePath] = "commit---"+previousCommitId+"---"+hash
 				return nil
 			}
 		}

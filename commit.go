@@ -92,5 +92,10 @@ func Commit(commitMessage string) {
 		fmt.Println("Error writing to creating head index file:", err)
 	}
 
+	err = os.WriteFile(".fit/currindex.txt", []byte(uniqueName), 0666)
+	if err != nil {
+		fmt.Println("error creating curr index file",err)
+	}
+
 	fmt.Println("Commit successful:", uniqueName)
 }

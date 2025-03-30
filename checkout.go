@@ -132,12 +132,13 @@ func RevertChanges(prevCommitDir,cwd,userGivenCommit string) error {
     //     }
     // }
 
+
 	err = ChangeHead(userGivenCommit)
 	if err!=nil{
 		color.Red("error changing the head..." , err)
 	}
 
-	color.Cyan("Head changed to ----> ",userGivenCommit)
+	color.Cyan("ChangeCurrIndex changed to ----> ",userGivenCommit)
 
     return nil
 }

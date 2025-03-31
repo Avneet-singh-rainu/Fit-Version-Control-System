@@ -10,7 +10,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func Checkout(commitHash string) {
+func Checkout(targetCommitHash string) {
 	// i need to check if fit is initiated or not?
 	err := FitExists()
 	if(err!=nil){
@@ -24,7 +24,7 @@ func Checkout(commitHash string) {
 	if err!=nil{
 		color.Red(err.Error())
 	}
-	// find the commithash named dir in the "fit/object/" dir.
+	// find the targetCommitHash named dir in the "fit/object/" dir.
 	//after finding the dir i need to move the content of that dir into the cwd or base dir
 	//after reverting i can optionally delete the commithash folder
 	if dirs, e := os.ReadDir(blobFolder); e != nil {
@@ -34,15 +34,15 @@ func Checkout(commitHash string) {
 		for _, dir := range dirs {
 			dirName := dir.Name()
 
-			if dirName==commitHash{
+			if dirName==targetCommitHash{
 				cwd, e := os.Getwd()
 				if e != nil {
 					fmt.Println("Error getting the current working directory:")
 					return
 				}
-				srcDir := path.Join(cwd,blobFolder,dirName)
+				targetCommitDir := path.Join(cwd,blobFolder,dirName)
 				// after finding the commithash folder i will revert the changes
-				err := RevertChanges(srcDir,cwd,commitHash)
+				err := RevertChanges(targetCommitDir,cwd,targetCommitHash)
 
 				if err != nil{
 					fmt.Println(err)
@@ -67,20 +67,20 @@ func Checkout(commitHash string) {
 // and from there i can get the file having the same hash that i have store in the format ["COMMIT-\COMMITID-\FILEHASH"]
 
 
-func RevertChanges(prevCommitDir,cwd,userGivenCommit string) error {
+func RevertChanges(targetCommitDir,cwd,userGivenCommit string) error {
     //fmt.Println("Starting RevertChanges from", prevCommitDir, "to", cwd)
 
 	// i will read the index.txt from the prevCommitDir and converet it into MAP of FileToHash
-	prevCommitIndexMap := SFileToHash{Files:make(map[string]string)}
+	targetCommitIndexMap := SFileToHash{Files:make(map[string]string)}
 
    // Read index file of the previous commit
-   indexFile, err := os.ReadFile(prevCommitDir+"/index.txt")
+   targetCommitIndexJsonFile, err := os.ReadFile(targetCommitDir+"/index.txt")
    if err != nil {
 	   return fmt.Errorf("error reading source directory: %v", err)
    }
 
    // converting the index File into struct
-   json.Unmarshal(indexFile,&prevCommitIndexMap)
+   json.Unmarshal(targetCommitIndexJsonFile,&targetCommitIndexMap)
    // now i have the map of all the files and their location
    // now i will iterate thru all the entries in the map and for each entry i have location
    // according to that location i will update the content
@@ -89,7 +89,8 @@ func RevertChanges(prevCommitDir,cwd,userGivenCommit string) error {
 
 
 	// Get map keys
-   for k,v := range prevCommitIndexMap.Files{
+   for k,v := range targetCommitIndexMap.Files{
+		fmt.Println("k---------v",k,v)
 		values := strings.Split(v, "---")
 		if len(values)>1{
 			BringAndUpdateFromReferencedCommit(k,userGivenCommit,values[1],values[2])

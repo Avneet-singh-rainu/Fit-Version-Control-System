@@ -75,7 +75,7 @@ func BringAndUpdateFromThisCommit(destAbsPath,currCommitId,fileHash string) erro
 
 	cwd,err:= os.Getwd()
 	if err!=nil{
-		fmt.Println("error in reading cwd")
+		color.Red("error in reading cwd")
 		return err
 	}
 
@@ -86,7 +86,7 @@ func BringAndUpdateFromThisCommit(destAbsPath,currCommitId,fileHash string) erro
 
 	err = CopyFileAndDecompress(srcPath,destAbsPath)
 	if err!=nil{
-		fmt.Println("error in creataing  file")
+		color.Red("error in creating file")
 		return err
 	}
 	return nil

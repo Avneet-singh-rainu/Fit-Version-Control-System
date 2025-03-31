@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // MoveDir moves an entire directory and deletes the original after copying
@@ -146,6 +148,7 @@ func GetFitignFiles() (ignoreFiles []string, ignoreDirs []string, err error) {
 
 // CopyFileAndDecompress decompresses a gzip file and saves it.
 func CopyFileAndDecompress(srcFilePath, destFilePath string) error {
+
     // Check if the file actually has a .gz extension
     if !strings.HasSuffix(srcFilePath, ".gz") {
         return fmt.Errorf("file %s is not a gzip compressed file", srcFilePath)
@@ -169,9 +172,26 @@ func CopyFileAndDecompress(srcFilePath, destFilePath string) error {
     destFilePath = strings.TrimSuffix(destFilePath, ".gz")
 
     // Create the destination file
+    //destFile, err := os.CreateFile(destFilePath)
     destFile, err := os.Create(destFilePath)
+
+
+	// if the dest file path is the dir that isnt created yet
+	// then create all the parent dirs and after that
+	// create the dest file
     if err != nil {
-        return fmt.Errorf("error creating destination file: %v", err)
+        err = os.MkdirAll(filepath.Dir(destFilePath), os.ModePerm)
+		if err != nil {
+			fmt.Println("Error creating directories:", err)
+			return err
+		}
+		destFile, err = os.Create(destFilePath)
+		if err != nil {
+			color.Red("Error creating base file...")
+			return err
+		}
+		fmt.Println("dir created successfully,.,.,,",destFilePath)
+
     }
     defer destFile.Close()
 

@@ -17,7 +17,9 @@ import (
 func BringAndUpdateFromReferencedCommit(destAbsPath,checkoutCommitId,foreignCommitId, fileHash string) error {
 	cwd,err:= os.Getwd()
 	if err!=nil{
+		color.Set(color.FgRed, color.Bold)
 		fmt.Println("error in reading cwd")
+		color.Unset()
 		return err
 	}
 	//destFileName := filepath.Base(destAbsPath)
@@ -132,9 +134,9 @@ func RemoveOrphanFilesAndDirs(targetCommitId string) error {
 	json.Unmarshal(bfile, &targetCommitIndexFile)
 	targetCommitIndexPaths := slices.Sorted(maps.Keys(targetCommitIndexFile.Files))
 
-	fmt.Println("fitignFiles...\n", fitignFiles)
-	fmt.Println("fitignDirs...\n", fitignDirs)
-	fmt.Println("targetCommitIndexPaths...\n", targetCommitIndexPaths)
+	// fmt.Println("fitignFiles...\n", fitignFiles)
+	// fmt.Println("fitignDirs...\n", fitignDirs)
+	// fmt.Println("targetCommitIndexPaths...\n", targetCommitIndexPaths)
 
 	// Scan directory and collect files/dirs for removal -----------------------------------------------------------
 	dirs, err := os.ReadDir(cwd)
@@ -170,7 +172,7 @@ func RemoveOrphanFilesAndDirs(targetCommitId string) error {
 			if entry.Name()==".fitign"{
 				continue
 			}
-			fmt.Println("file entry path,,,,,,,,",entryPath)
+			//fmt.Println("file entry path,,,,,,,,",entryPath)
 			// make sure that i compare ext with fitign files and path with indexpath
 			if contains(fitignFiles, path.Ext(entry.Name())) || contains(targetCommitIndexPaths, entryPath) {
 				continue
@@ -182,14 +184,18 @@ func RemoveOrphanFilesAndDirs(targetCommitId string) error {
 
 	// remove files first
 	for _, file := range filesToRemove {
+		color.Set(color.FgGreen)
 		fmt.Println("Removing file:", file)
 		os.Remove(file)
+		color.Unset()
 	}
 
 	// remove directories only if empty
 	for _, dir := range dirsToRemove {
+		color.Set(color.FgGreen)
 		fmt.Println("Removing directory:", dir)
 		os.RemoveAll(dir)
+		color.Unset()
 	}
 
 	return nil

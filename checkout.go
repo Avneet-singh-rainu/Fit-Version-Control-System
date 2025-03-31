@@ -28,7 +28,8 @@ func Checkout(targetCommitHash string) {
 	//after finding the dir i need to move the content of that dir into the cwd or base dir
 	//after reverting i can optionally delete the commithash folder
 	if dirs, e := os.ReadDir(blobFolder); e != nil {
-		fmt.Print("Error reading the blob folder during Checkout", e)
+		color.Red("Error reading the blob folder during Checkout")
+		fmt.Print(e)
 		return
 	} else {
 		for _, dir := range dirs {
@@ -37,7 +38,7 @@ func Checkout(targetCommitHash string) {
 			if dirName==targetCommitHash{
 				cwd, e := os.Getwd()
 				if e != nil {
-					fmt.Println("Error getting the current working directory:")
+					color.Red("Error getting the current working directory:")
 					return
 				}
 				targetCommitDir := path.Join(cwd,blobFolder,dirName)
@@ -50,8 +51,8 @@ func Checkout(targetCommitHash string) {
 				}
 				// if successfully moved the content then delete the folder
 				// BUT TO STAY SAFE I WILL NOT DELETE AS I MIGHT DELETE SOMETHING ELSE
-				fmt.Println(dirName,"-> is to be deleted...")
-				fmt.Println("successfully Checkout done...🚀🚀")
+				//fmt.Println(dirName,"-> is to be deleted...")
+				color.Green("successfully Checkout done...🚀🚀")
 				//os.RemoveAll(dirName)
 			}
 		}
@@ -76,7 +77,9 @@ func RevertChanges(targetCommitDir,cwd,userGivenCommit string) error {
    // Read index file of the previous commit
    targetCommitIndexJsonFile, err := os.ReadFile(targetCommitDir+"/index.txt")
    if err != nil {
-	   return fmt.Errorf("error reading source directory: %v", err)
+
+		color.Red("error reading source directory")
+	   return fmt.Errorf("%v", err)
    }
 
    // converting the index File into struct
@@ -90,15 +93,18 @@ func RevertChanges(targetCommitDir,cwd,userGivenCommit string) error {
 
 	// Get map keys
    for k,v := range targetCommitIndexMap.Files{
-		fmt.Println("k---------v",k,v)
+
 		values := strings.Split(v, "---")
 		if len(values)>1{
 			BringAndUpdateFromReferencedCommit(k,userGivenCommit,values[1],values[2])
 		} else {
 			err = BringAndUpdateFromThisCommit(k,userGivenCommit,values[0])
-			if err!=nil{
-				fmt.Printf("error updating file from %v commit ---> %v\n",userGivenCommit,err)
+			if err != nil {
+				color.Set(color.FgRed, color.Bold)
+				fmt.Printf("❌ Error updating file from commit %v: %v\n", userGivenCommit, err)
+				color.Unset() // Reset color settings
 			}
+
 		}
    }
 
@@ -137,13 +143,12 @@ func RevertChanges(targetCommitDir,cwd,userGivenCommit string) error {
 
 	RemoveOrphanFilesAndDirs(userGivenCommit);
 
-
-
 	err = ChangeHead(userGivenCommit)
 	if err!=nil{
 		color.Red("error changing the head..." , err)
 	}
 
-	color.Cyan("ChangeCurrIndex changed to ----> ",userGivenCommit)
+	// color.Set(color.FgHiGreen)
+	// fmt.Println("changed head to---> ",userGivenCommit)
     return nil
 }

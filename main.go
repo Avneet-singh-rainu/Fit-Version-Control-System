@@ -15,6 +15,8 @@ const indexFile = stageFolder + "index.txt"
 const commitSeperator = ",,"
 const stageIndexFile = ".fit/stage/index.txt"
 var previousCommitId string = ""
+var headIndexFilePath  string =".fit/HEAD/index.txt"
+
 
 // 2
 func main() {
@@ -36,6 +38,11 @@ func main() {
 
 
 	switch command {
+
+	case "status":{
+		Status()
+		break
+	}
 
 	case "init":{
 			Init()

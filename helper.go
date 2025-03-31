@@ -60,7 +60,7 @@ func CopyDirAndDecompress(src, dest string) error {
 
 	for _, entry := range entries {
 		srcPath := filepath.Join(src, entry.Name())
-		destPath := filepath.Join(dest, strings.TrimSuffix(entry.Name(), ".gz")) // Remove `.gz` before decompressing
+		destPath := filepath.Join(dest, strings.TrimSuffix(entry.Name(), ".gz"))
 
 		if entry.IsDir() {
 			// Recursively decompress subdirectories
@@ -119,8 +119,10 @@ func GetFitignFiles() (ignoreFiles []string, ignoreDirs []string, err error) {
 		}
 	}
 
-	fmt.Println("Ignored Directories:", ignoreDirs)
-	fmt.Println("Ignored Files:", ignoreFiles)
+	color.Set(color.FgYellow)
+	fmt.Println("🔍 Ignored Directories -->", ignoreDirs)
+	fmt.Println("📂 Ignored Files -->", ignoreFiles)
+	color.Unset()
 
 	return ignoreFiles, ignoreDirs, nil
 }
@@ -200,7 +202,7 @@ func CopyFileAndDecompress(srcFilePath, destFilePath string) error {
         return fmt.Errorf("error copying decompressed data: %v", err)
     }
 
-    fmt.Println("✅ Decompression successful:", destFilePath)
+    //fmt.Println("✅ Decompression successful:", destFilePath)
     return nil
 }
 

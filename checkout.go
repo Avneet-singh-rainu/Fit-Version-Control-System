@@ -133,12 +133,16 @@ func RevertChanges(prevCommitDir,cwd,userGivenCommit string) error {
     // }
 
 
+
+	RemoveOrphanFilesAndDirs(userGivenCommit);
+
+
+
 	err = ChangeHead(userGivenCommit)
 	if err!=nil{
 		color.Red("error changing the head..." , err)
 	}
 
 	color.Cyan("ChangeCurrIndex changed to ----> ",userGivenCommit)
-
     return nil
 }

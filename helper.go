@@ -188,26 +188,6 @@ func CopyFileAndDecompress(srcFilePath, destFilePath string) error {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // CopyFile copies a file from src to dest.
 func CopyFile(srcFilePath, destFilePath string) error {
 	srcFile, err := os.Open(srcFilePath)

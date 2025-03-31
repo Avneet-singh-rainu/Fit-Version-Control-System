@@ -3,8 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
+	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/fatih/color"
@@ -101,4 +104,115 @@ func ChangeHead(userGivenCommit string) error {
 	headFilePath := filepath.Join(cwd,".fit","HEAD","index.txt")
 	os.WriteFile(headFilePath, []byte(userGivenCommit), 0666)
 	return nil
+}
+
+func RemoveOrphanFilesAndDirs(targetCommitId string) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		color.Red("error fetching working directory...")
+		return err
+	}
+
+	// Fetch fitign files and dirs -----------------------------------------------------------
+	fitignFiles, fitignDirs, err := GetFitignFiles()
+	if err != nil {
+		color.Red("error fetching fitign files...")
+		return err
+	}
+
+	// Get target commit index paths -----------------------------------------------------------
+	targetCommitIndexFilePath := filepath.Join(cwd, ".fit", "object", targetCommitId, "index.txt")
+	bfile, err := os.ReadFile(targetCommitIndexFilePath)
+	if err != nil {
+		color.Red("error fetching target commit files...")
+		return err
+	}
+
+	targetCommitIndexFile := SFileToHash{}
+	json.Unmarshal(bfile, &targetCommitIndexFile)
+	targetCommitIndexPaths := slices.Sorted(maps.Keys(targetCommitIndexFile.Files))
+
+	fmt.Println("fitignFiles...\n", fitignFiles)
+	fmt.Println("fitignDirs...\n", fitignDirs)
+	fmt.Println("targetCommitIndexPaths...\n", targetCommitIndexPaths)
+
+	// Scan directory and collect files/dirs for removal -----------------------------------------------------------
+	dirs, err := os.ReadDir(cwd)
+	if err != nil {
+		color.Red("error iterating cwd files...")
+		return err
+	}
+
+	filesToRemove := []string{}
+	dirsToRemove := []string{}
+
+	// iterating the cwd files and dirs -----------------------------------------------------------
+
+	for _, entry := range dirs {
+		entryPath := filepath.Join(cwd, entry.Name())
+
+		// skip dir if they are in `fitignDirs`
+		if entry.IsDir() {
+
+			if entry.Name()==".fit"{
+				continue
+			}
+
+			if contains(fitignDirs, "/"+entry.Name()) {
+				continue
+			}
+
+			// recursively check if the directory contains tracked files
+			if !isDirectoryTracked(entryPath, targetCommitIndexPaths) {
+				dirsToRemove = append(dirsToRemove, entryPath)
+			}
+		} else {
+			if entry.Name()==".fitign"{
+				continue
+			}
+			fmt.Println("file entry path,,,,,,,,",entryPath)
+			// make sure that i compare ext with fitign files and path with indexpath
+			if contains(fitignFiles, path.Ext(entry.Name())) || contains(targetCommitIndexPaths, entryPath) {
+				continue
+			}else{
+				filesToRemove = append(filesToRemove, entryPath)
+			}
+		}
+	}
+
+	// remove files first
+	for _, file := range filesToRemove {
+		fmt.Println("Removing file:", file)
+		os.Remove(file)
+	}
+
+	// remove directories only if empty
+	for _, dir := range dirsToRemove {
+		fmt.Println("Removing directory:", dir)
+		os.RemoveAll(dir)
+	}
+
+	return nil
+}
+
+// checks if a directory has any tracked files
+func isDirectoryTracked(dirPath string, trackedFiles []string) bool {
+	for _, filePath := range trackedFiles {
+		if strings.HasPrefix(filePath, dirPath) {
+			return true // the directory contains at least one tracked file
+		}
+	}
+	return false
+}
+
+
+
+// helper function to check if a slice contains a value
+func contains(slice []string, val string) bool {
+	for _, v := range slice {
+		if v == val {
+			return true
+		}
+	}
+	return false
 }

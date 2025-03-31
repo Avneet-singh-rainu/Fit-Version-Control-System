@@ -29,13 +29,14 @@ func Add(filename string) {
 
 	// Ensure the staging folder exists
 	if err = os.MkdirAll(stageFolder, 0755); err != nil {
-		fmt.Println("Error creating staging directory:", err)
+		color.Red("Error creating staging directory")
+		fmt.Println(err)
 		return
 	}
 
 	if filename =="."{
 		stageAllFiles()
-		fmt.Println("staged all files...")
+		color.Green("staged all files")
 		return
 	}
 
@@ -47,7 +48,8 @@ func Add(filename string) {
 	// Open the source file
 	sourceFile, err := os.Open(filename)
 	if err != nil {
-		fmt.Println("Error opening source file:", err)
+		color.Green("Error opening source file")
+		fmt.Println(err)
 		return
 	}
 	defer sourceFile.Close()
@@ -55,24 +57,27 @@ func Add(filename string) {
 	// Read the content of the source file
 	content, err := io.ReadAll(sourceFile)
 	if err != nil {
-		fmt.Println("Error reading source file:", err)
+		color.Green("Error reading source file")
+		fmt.Println( err)
 		return
 	}
 
 	// Write content to the new staged file
 	if err := os.WriteFile(stagedFilePath, content, 0644); err != nil {
-		fmt.Println("Error writing to staged file:", err)
+		color.Green("Error writing to staged file:")
+		fmt.Println(err)
 		return
 	}
 
 	// Store filename mapping in the index file
 	entry := fmt.Sprintf("%s %s\n", filename, filename)
 	if err := EntryHashToFile(indexFile, entry); err != nil {
-		fmt.Println("Error writing to index file:", err)
+		color.Red("Error writing to index file")
+		fmt.Println(err)
 		return
 	}
 
-	fmt.Println("File staged successfully:", stagedFilePath)
+	color.Green("File staged successfully:", stagedFilePath)
 }
 
 
@@ -88,14 +93,19 @@ func stageAllFiles() {
 	// [ filepath -----Map to---> previous commit id ]
 	// and i can locate the content of the file using the commit id in the object and after that i can can its index for the filepath that
 	// i want and from there i will get the hash of the file and load its content...
+	ignoreFiles := []string{}
+	ignoreDirs := []string{}
 	rootDir, err := os.Getwd()
     if err != nil {
+		color.Set(color.FgRed)
         fmt.Println("Error getting current directory:", err)
+		color.Unset()
         return
     }
 
 	latestCommitHash,err := os.ReadFile(filepath.Join(rootDir,".fit","HEAD","index.txt"))
 	if err != nil {
+		// for the first staging there will be no latest commit so seeding the head.txt
         os.WriteFile(filepath.Join(rootDir,".fit","HEAD","index.txt"),[]byte{00},0666)
     }
 
@@ -103,7 +113,9 @@ func stageAllFiles() {
 	lastCommitIndexInfo := SFileToHash{ParentCommitId : "",Files: make(map[string]string)}
 	err = CalculatePreviousHashes(&lastCommitIndexInfo)
 	if err!=nil{
+		color.Set(color.FgRed)
 		fmt.Println("error calculating previous hashes...",err)
+		color.Unset()
 	}
 
 	// initiating a fileToHash struct so that i can store the current files info
@@ -112,7 +124,9 @@ func stageAllFiles() {
 	// calculating the stage path for further use
     stagePath := filepath.Join(rootDir, stageFolder)
     if err := os.MkdirAll(stagePath, 0755); err != nil {
+		color.Set(color.FgRed)
         fmt.Println("Error creating stage folder:", err)
+		color.Unset()
         return
     }
 
@@ -120,7 +134,9 @@ func stageAllFiles() {
 	// read all the dirs in the cwd so that i can stage them
     entries, err := os.ReadDir(rootDir)
     if err != nil {
+		color.Set(color.FgRed)
         fmt.Println("Error reading directory:", err)
+		color.Unset()
         return
     }
 	// iteration over the files and dirs in the cwd
@@ -128,13 +144,13 @@ func stageAllFiles() {
 
 		// if the entry extension is in the fitign the dont add it to the staging area...
 		entryExtension := path.Ext(entry.Name())
-		ignoreFiles,ignoreDirs,err := GetFitignFiles()
+		ignoreFiles,ignoreDirs,err = GetFitignFiles()
 		if(err != nil){
+			color.Set(color.FgRed)
 			fmt.Println("error in GetFitignFiles",err)
+			color.Unset()
 		}
 		if(entry.Name()==".fit" || entry.Name()==".git" || entry.Name()=="fit.exe" ){continue}
-
-
 
         srcPath := filepath.Join(rootDir, entry.Name())
         destPath := filepath.Join(stagePath, entry.Name())
@@ -143,9 +159,11 @@ func stageAllFiles() {
 			if Contains(ignoreDirs,"/"+entry.Name()){
 				continue
 			}
-            fmt.Println("Staging directory:", srcPath, "->", destPath)
+            //fmt.Println("Staging directory:", srcPath, "->", destPath)
             if err := CopyDirAndCompress(srcPath, destPath,&newCommitIndexInfo.Files,&lastCommitIndexInfo.Files); err != nil {
+				color.Set(color.FgRed)
                 fmt.Println("Error staging directory:", err)
+				color.Unset()
             }
         } else {
 			if Contains(ignoreFiles,entryExtension){
@@ -154,7 +172,9 @@ func stageAllFiles() {
 			// i will store the dest file by his calculated hash...
             //fmt.Println("Staging file:", srcPath, "->", destPath)
             if err := CopyFileAndCompress(srcPath, destPath,&newCommitIndexInfo.Files,&lastCommitIndexInfo.Files); err != nil {
+				color.Set(color.FgRed)
                 fmt.Println("Error staging file:", err)
+				color.Unset()
 				return
              } //else {
             //     // Append file to index
@@ -172,18 +192,27 @@ func stageAllFiles() {
 	bres,err := json.Marshal(newCommitIndexInfo)
 
 	if err!=nil{
+		color.Set(color.FgRed)
 		fmt.Println("error in Marshaling to json",err)
+		color.Unset()
 	}
 
-    fmt.Println(string(bres))
+    //fmt.Println(string(bres))
 
 	file,err := os.Create(indexFile)
 	if(err !=nil){
+		color.Set(color.FgRed)
 		fmt.Println("errror in creating stage index file",err)
+		color.Unset()
 	}
 
 	file.Write(bres)
 	file.Close()
+
+	color.Set(color.FgYellow)
+	fmt.Println("🔍 Ignored Directories -->", ignoreDirs)
+	fmt.Println("📂 Ignored Files -->", ignoreFiles)
+	color.Unset()
 
 }
 

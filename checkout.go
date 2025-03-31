@@ -52,7 +52,7 @@ func Checkout(targetCommitHash string) {
 				// if successfully moved the content then delete the folder
 				// BUT TO STAY SAFE I WILL NOT DELETE AS I MIGHT DELETE SOMETHING ELSE
 				//fmt.Println(dirName,"-> is to be deleted...")
-				color.Green("successfully Checkout done...🚀🚀")
+				color.Green("Checkout successfully done 🚀🚀")
 				//os.RemoveAll(dirName)
 			}
 		}

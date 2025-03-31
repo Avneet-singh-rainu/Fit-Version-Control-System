@@ -119,10 +119,10 @@ func GetFitignFiles() (ignoreFiles []string, ignoreDirs []string, err error) {
 		}
 	}
 
-	color.Set(color.FgYellow)
-	fmt.Println("🔍 Ignored Directories -->", ignoreDirs)
-	fmt.Println("📂 Ignored Files -->", ignoreFiles)
-	color.Unset()
+	// color.Set(color.FgYellow)
+	// fmt.Println("🔍 Ignored Directories -->", ignoreDirs)
+	// fmt.Println("📂 Ignored Files -->", ignoreFiles)
+	// color.Unset()
 
 	return ignoreFiles, ignoreDirs, nil
 }
@@ -192,7 +192,7 @@ func CopyFileAndDecompress(srcFilePath, destFilePath string) error {
 			color.Red("Error creating base file...")
 			return err
 		}
-		fmt.Println("dir created successfully,.,.,,",destFilePath)
+		//fmt.Println("dir created successfully --> ",destFilePath)
 
     }
     defer destFile.Close()

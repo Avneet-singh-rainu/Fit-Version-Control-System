@@ -38,7 +38,9 @@ func CopyDirAndCompress(src, dest string , fileToHash , latestCommitIndex *map[s
 		// i will store the dest file by his calculated hash...
 		hashDestFilePath,err := CalculateHash(entry.Name())
 		if err!=nil{
+			color.Set(color.FgRed)
 			fmt.Println("error in calculating hash",err)
+			color.Unset()
 		}
 
 		srcPath := filepath.Join(src, entry.Name())
@@ -51,15 +53,18 @@ func CopyDirAndCompress(src, dest string , fileToHash , latestCommitIndex *map[s
 			}
 		} else {
 			// Compress individual files
-
+			color.Set(color.FgGreen)
             fmt.Println("Staging file:", srcPath, "->", hashDestFilePath)
+			color.Unset()
 			if err := CopyFileAndCompress(srcPath, destPath,fileToHash,latestCommitIndex); err != nil {
 				return err
 			} else {
                 // Append file to index
                 entry := fmt.Sprintf("%s %s\n", entry.Name(), hashDestFilePath)
                 if err := EntryHashToFile(indexFile, entry); err != nil {
+					color.Set(color.FgRed)
                     fmt.Println("Error writing to index file:", err)
+					color.Unset()
                 }
             }
 		}
@@ -102,7 +107,7 @@ func CopyFileAndCompress(srcFilePath, destFilePath string, newCommitIndexInfo,la
 	for _, hash := range *latestCommitIndex {
 
 		hashParts := strings.Split(hash, "---")
-		fmt.Println("stsaging hashparts of latest commit",hashParts)
+		//fmt.Println("stsaging hashparts of latest commit",hashParts)
 		if len(hashParts)>1 && hashParts[2]==srcFileHash{
 			(*newCommitIndexInfo)[srcFilePath] = "commit---"+string(blastCommitId)+"---"+hashParts[2]
 			return nil
@@ -110,7 +115,7 @@ func CopyFileAndCompress(srcFilePath, destFilePath string, newCommitIndexInfo,la
 			(*newCommitIndexInfo)[srcFilePath] = "commit---"+string(blastCommitId)+"---"+hash
 			return nil
 		} else {
-			fmt.Println("File hash does not exist in the map.")
+			//fmt.Println("File hash does not exist in the map.")
 		}
 	}
 
@@ -146,7 +151,7 @@ func CopyFileAndCompress(srcFilePath, destFilePath string, newCommitIndexInfo,la
 		return err
 	}
 
-	fmt.Println("Compression successful:", destFilePath)
+	//fmt.Println("Compression successful:", destFilePath)
 	return nil
 }
 

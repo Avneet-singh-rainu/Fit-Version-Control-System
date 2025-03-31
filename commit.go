@@ -96,6 +96,7 @@ func Commit(commitMessage string) {
 	if err != nil {
 		fmt.Println("error creating curr index file",err)
 	}
-
+	color.Set(color.BgHiGreen,color.Bold,color.FgHiWhite)
 	fmt.Println("Commit successful:", uniqueName)
+	color.Unset()
 }

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"golang.org/x/term"
 )
 
 // CommitEntry represents a single commit record
@@ -19,12 +18,6 @@ type CommitEntry struct {
 
 // Log displays the commit history from the commit index file in an appealing format
 func Log() {
-	// Get terminal width for formatting
-	width, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println("Could not determine terminal size:", err)
-		width = 80 // Default width if size can't be determined
-	}
 
 	// Open and read commit index file
 	content, err := readCommitFile(commitIndexFile)
@@ -37,7 +30,7 @@ func Log() {
 
 	// Display header
 	headerStyle := color.New(color.FgHiWhite, color.Bold).Add(color.BgBlue)
-	divider := strings.Repeat("─", width-1)
+	divider := strings.Repeat("─", terminalWidth-1)
 
 	headerStyle.Println(" COMMIT HISTORY ")
 	fmt.Println(divider)

@@ -61,12 +61,12 @@ func BringAndUpdateFromReferencedCommit(destAbsPath,checkoutCommitId,foreignComm
 		}
 		} else {
 			srcCommitFile := filepath.Join(srcCommitDir,requiredFileHash)
-		err = CopyFileAndDecompress(srcCommitFile+".gz",destAbsPath)
-		if err!=nil{
-			color.Red("error while copying the referenced file",err)
+			err = CopyFileAndDecompress(srcCommitFile+".gz",destAbsPath)
+			if err!=nil{
+				color.Red("error while copying the referenced file",err)
+			}
+			//color.Yellow("Successfully reverted changes: ",srcCommitFile)
 		}
-		color.Yellow("✅ Successfully reverted changes: ",srcCommitFile)
-	}
 
 	return nil
 }

@@ -55,14 +55,14 @@ func Status() {
 		if commitId == headCommit {
 
 			color.Set(color.FgBlue, color.Bold)
-			fmt.Println("\n🔵 Current Commit:")
+			fmt.Println("\nCurrent Commit:")
 			color.Unset()
 
 			// Display commit details
-			color.Set(color.FgYellow)
-			fmt.Printf("🔹 Commit ID: %s\n", commitId)
-			fmt.Printf("⏳ Time: %s\n", time)
-			fmt.Printf("💬 Message: %s\n\n", message)
+			color.Set(color.FgHiYellow)
+			fmt.Printf("Commit ID: %s\n", commitId)
+			fmt.Printf("Time: %s\n", time)
+			fmt.Printf("Message: %s\n\n", message)
 			color.Unset()
 
 			return
